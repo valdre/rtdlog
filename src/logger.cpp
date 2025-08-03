@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
     bool wire3 = true, hz50 = true;
     double Rcal = 1.22e-4, Rtmp;
 
-    std::vector < MaxRTDProbe > probes;
+    std::vector < MaxRTDProbe * > probes;
 
     char striga[1000];
     frase riga;
@@ -118,10 +118,13 @@ int main(int argc, char *argv[]) {
         }
         
         if(strcmp(riga.com, "add") == 0) {
-            MaxRTDProbe probe(dev, ce, mode);
-            if(!(probe.IsZombie())) {
-                probe.Configure(true, true, wire3, hz50);
-                probe.SetRcal(Rcal);
+            MaxRTDProbe *probe = new MaxRTDProbe(dev, ce, mode);
+            if(probe->IsZombie()) {
+                delete probe;
+            }
+            else {
+                probe->Configure(true, true, wire3, hz50);
+                probe->SetRcal(Rcal);
                 probes.push_back(probe);
             }
         }
@@ -144,7 +147,7 @@ int main(int argc, char *argv[]) {
             if(Nav > 5) {
                 for(size_t i = 0; i < probes.size(); i++) {
                     ave[i] /= (double)Nav;
-                    printf("    T = %7.3f C  (ADCav = %5.0f)\n", probes[i].Tconv(ave[i]), ave[i]);
+                    printf("    T = %7.3f C  (ADCav = %5.0f)\n", probes[i]->Tconv(ave[i]), ave[i]);
                     ave[i] = 0;
                 }
                 Nav = 0;
@@ -162,7 +165,7 @@ int main(int argc, char *argv[]) {
         print_date(tnow.tv_sec); printf(": ADC readings ->");
         
         for(size_t i = 0; i < probes.size() + 1; i++) {
-            stat = probes[i].ADCRead(sam);
+            stat = probes[i]->ADCRead(sam);
             if(stat < 0) goto err_exit;
             ave[i] += sam;
             printf(" %5.0f", sam);
@@ -170,9 +173,10 @@ int main(int argc, char *argv[]) {
         Nav++;
         printf("\n");
     }
-    
-    return 0;
+    goto std_exit;
     err_exit:
     printf("One or more errors occurred. Exiting...\n");
+    std_exit:
+    for(size_t i = 0; i < probes.size() + 1; i++) delete probes[i];
     return 0;
 }
