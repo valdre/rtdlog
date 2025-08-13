@@ -193,9 +193,9 @@ int main(int argc, char *argv[]) {
                     ave[i] /= (double)Nav;
                     temp[i] = probes[i]->Tconv(ave[i]);
                     printf("    T = %7.3f C  (ADCav = %5.0f)\n", temp[i], ave[i]);
-                    if(datalog(&flog, tnow.tv_sec, false, temp)) goto err_exit;
                     ave[i] = 0;
                 }
+                if(datalog(&flog, tnow.tv_sec, false, temp)) goto err_exit;
                 Nav = 0;
             }
             else {
