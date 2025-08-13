@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
         printf(UP);
         print_date(tnow.tv_sec); printf(": ADC readings ->");
         
-        for(size_t i = 0; i < probes.size() + 1; i++) {
+        for(size_t i = 0; i < probes.size(); i++) {
             stat = probes[i]->ADCRead(sam);
             if(stat < 0) goto err_exit;
             ave[i] += sam;
