@@ -3,7 +3,7 @@
 
 
 DataLog::DataLog(const int &_flush_interval) {
-    flog == NULL;
+    flog = NULL;
     last_day = -1; last_flush = -1;
     flush_interval = _flush_interval;
 }
@@ -15,7 +15,7 @@ DataLog::~DataLog() {
 void DataLog::Close() {
     if(flog == NULL) return;
     fclose(flog);
-    flog == NULL;
+    flog = NULL;
     return;
 }
 

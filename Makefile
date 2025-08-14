@@ -3,7 +3,7 @@ all: logger
 lib/%.o: src/%.cpp
 	g++ -Wall -Wextra -c -o $@ $<
 
-logger: src/logger.cpp lib/maxlib.o
+logger: src/logger.cpp lib/maxlib.o lib/datalog.o
 	g++ -Wall -Wextra -Isrc -o $@ $^ -lm
 
 clean:

@@ -40,7 +40,7 @@ MaxRTDProbe::~MaxRTDProbe() {
     if(!fZombie) {
         close(fd);
     }
-    printf("DEBUG: closing\n");
+    //printf("DEBUG: closing\n");
 }
 
 bool MaxRTDProbe::IsZombie() {
@@ -189,7 +189,7 @@ int MaxRTDProbe::SetRcal(const double &Rref, const double &R0) {
 }
 
 double MaxRTDProbe::Tconv(const double &adc) {
-    printf("\nDEBUG: Rcal = %e", Rcal);
+    //printf("\nDEBUG: Rcal = %e\n\n", Rcal);
     double rr = adc * Rcal;
     if(rr > 500) return 1000; //Too high temperature
     //Quadratic approximation valid from 0 to 850 C (rr==1 means 0 C)
