@@ -1,8 +1,8 @@
 #include "maxlib.h"
+#include "datalog.h"
 #include <cstring>
-#include <dirent.h>
-#include <signal.h>
-#include <time.h>
+#include <csignal>
+#include <ctime>
 #include <sys/time.h>
 #include <sys/types.h>
 
@@ -51,49 +51,8 @@ void print_date(const unsigned &sec) {
     printf("%04d-%02d-%02d %02d:%02d:%02d", tloc->tm_year + 1900, tloc->tm_mon+1, tloc->tm_mday, tloc->tm_hour, tloc->tm_min, tloc->tm_sec);
 }
 
-int datalog(FILE **flog, const unsigned &sec, const bool &close_file, const std::vector < double > &temp) {
-    static int last = -1;
-    time_t timep = sec;
-    struct tm *tloc = localtime(&timep);
-    int now = (tloc->tm_year + 1900) * 10000 + (tloc->tm_mon+1) * 100 + tloc->tm_mday;
-    char fname[100];
-    sprintf(fname, "db/%08d.log", now);
-
-    if(*flog == NULL) {
-        if(close_file) return 0;
-        *flog = fopen(fname, "a");
-        last = now;
-    }
-    else {
-        if(close_file) {
-            fclose(*flog);
-            *flog = NULL;
-            return 0;
-        }
-        if(last != now) {
-            printf("DEBUG: a new day has begun!\n\n");
-            fclose(*flog);
-            *flog = fopen(fname, "a");
-            last = now;
-        }
-    }
-
-    if(*flog == NULL) {
-        perror(fname);
-        return -1;
-    }
-    
-    fprintf(*flog, "%02d:%02d", tloc->tm_hour, tloc->tm_min);
-    for(size_t i = 0; i < temp.size(); i++) {
-        fprintf(*flog, " % 6.3f", temp[i]);
-    }
-    fprintf(*flog, "\n");
-    return 0;
-}
-
 int main(int argc, char *argv[]) {
     FILE *fin = NULL;
-    FILE *flog = NULL;
     if(argc > 1) {
         fin = fopen(argv[1], "r");
         if(fin == NULL) perror(argv[1]);
@@ -174,6 +133,8 @@ int main(int argc, char *argv[]) {
     }
     fclose(fin);
 
+    DataLog log;
+
     int stat, Nav = 0;
     std::vector < double >  ave(probes.size(), 0);
     std::vector < double > temp(probes.size(), 0);
@@ -195,7 +156,7 @@ int main(int argc, char *argv[]) {
                     printf("    T = %7.3f C  (ADCav = %5.0f)\n", temp[i], ave[i]);
                     ave[i] = 0;
                 }
-                if(datalog(&flog, tnow.tv_sec, false, temp)) goto err_exit;
+                if(log.WriteData(tnow.tv_sec, temp)) goto err_exit;
                 Nav = 0;
             }
             else {
@@ -224,6 +185,6 @@ int main(int argc, char *argv[]) {
     printf("One or more errors occurred. Exiting...\n");
     std_exit:
     for(size_t i = 0; i < probes.size() + 1; i++) delete probes[i];
-    datalog(&flog, 0, true, temp);
+    log.Close();
     return 0;
 }

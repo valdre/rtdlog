@@ -189,6 +189,7 @@ int MaxRTDProbe::SetRcal(const double &Rref, const double &R0) {
 }
 
 double MaxRTDProbe::Tconv(const double &adc) {
+    printf("\nDEBUG: Rcal = %e", Rcal);
     double rr = adc * Rcal;
     if(rr > 500) return 1000; //Too high temperature
     //Quadratic approximation valid from 0 to 850 C (rr==1 means 0 C)
